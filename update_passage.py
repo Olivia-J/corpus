@@ -41,7 +41,14 @@ def csv_out(vocab):
             f.write(w.word.encode('utf-8')+','+str(w.difficulty)+',')
             f.write(w.pospeech.encode('utf-8')+',"'+w.webster_def.encode('utf-8')+'",'+'"'+w.sentence.encode('utf-8')+'"\n')
     f.close()
-            
+
+def select(vocab):
+    selected=[]
+    for v in vocab:
+        w=Word.objects.get(word=v)
+        if w.difficulty > 5 and w.webster_def!='N/A':
+            selected.append(w)
+            return selected
 
 def latex_out():
     f=open('source/passage_vocab/'+filename+'.tex','w')
@@ -111,26 +118,27 @@ else:
     p_db=Passage.objects.filter(book__contains__="Prince")[0]
     p=p_db.content
     lemma_p=p_db.lemma
-passage=Text(p,lemma_p)
 
-vocab=passage.vocabulary()
-i=1
+def initial(p):
+    passage=Text(p,lemma_p)
+    vocab=passage.vocabulary()
+    i=1
+    st=LancasterStemmer()
+    newvocab=[]
+    difficulty=0.0
 
-st=LancasterStemmer()
+    #for v in vocab:
+    #    if len(Word.objects.filter(word=v))==0:
+    #        print i,"," +v#+",",vocab[v], Word.objects.filter(stem=st.stem(v))
+    #        i+=1
+    #        newvocab.append(v)
+    #    else:
+    #        diffi=float(Word.objects.get(word=v).difficulty)
+    #        if diffi >10:
+    #            print v, diffi 
+    #        difficulty+=vocab[v]*float(Word.objects.get(word=v).calc_diff)
 
-newvocab=[]
-difficulty=0.0
-#for v in vocab:
-#    if len(Word.objects.filter(word=v))==0:
-#        print i,"," +v#+",",vocab[v], Word.objects.filter(stem=st.stem(v))
-#        i+=1
-#        newvocab.append(v)
-#    else:
-#        diffi=float(Word.objects.get(word=v).difficulty)
-#        if diffi >10:
-#            print v, diffi 
-#        difficulty+=vocab[v]*float(Word.objects.get(word=v).calc_diff)
-
-difficulty=difficulty/len(passage.tokens)
-print len(vocab)
-#p_db.save()
+    difficulty=difficulty/len(passage.tokens)
+    print len(vocab)
+    #p_db.save()
+    return vocab, newvocab
